@@ -1,0 +1,178 @@
+apiVersion: apiextensions.crossplane.io/v1
+kind: Composition
+metadata:
+  name: k8s-cluster-gke-single-zone
+  labels:
+    provider: gcp-classic
+    cluster: gke
+    type: single-zone
+spec:
+  compositeTypeRef:
+    apiVersion: platform.com/v1alpha1
+    kind: KubernetesCluster
+  writeConnectionSecretsToNamespace: crossplane-system
+  patchSets:
+  - name: metadata
+    patches:
+    - fromFieldPath: metadata.labels
+  resources:
+  - name: compute-net
+    base:
+      apiVersion: compute.gcp.crossplane.io/v1beta1
+      kind: Network
+      spec:
+        forProvider:
+          autoCreateSubnetworks: false
+          routingConfig:
+            routingMode: REGIONAL
+        providerConfigRef:
+          name: gcp-provider 
+    patches:
+    - type: PatchSet
+      patchSetName: metadata
+    - fromFieldPath: spec.id
+      toFieldPath: metadata.name
+  - name: compute-subnet
+    base:
+      apiVersion: compute.gcp.crossplane.io/v1beta1
+      kind: Subnetwork
+      spec:
+        forProvider:
+          region: us-central1
+          networkSelector:
+            matchControllerRef: true
+          privateIpGoogleAccess: true
+          ipCidrRange: 172.16.0.0/16
+          secondaryIpRanges:
+          - rangeName: pods
+            ipCidrRange: 10.200.0.0/14
+          - rangeName: services
+            ipCidrRange: 10.204.0.0/16
+        providerConfigRef:
+          name: gcp-provider
+    patches:
+    - type: PatchSet
+      patchSetName: metadata
+    - fromFieldPath: spec.id
+      toFieldPath: metadata.name
+  - name: gkecluster
+    base:
+      apiVersion: container.gcp.crossplane.io/v1beta2
+      kind: Cluster
+      metadata:
+        labels:
+          clusterType: "workload"
+      spec:
+        forProvider:
+          location: us-central1-a #specifying a zone makes this control plane ZONAL
+          #autopilot: Autopilot clusters must be regional clusters
+          #  enabled: true
+          addonsConfig:
+            gcePersistentDiskCsiDriverConfig:
+              enabled: true
+            networkPolicyConfig:
+              disabled: false
+          ipAllocationPolicy:
+            clusterSecondaryRangeName: pods
+            createSubnetwork: false
+            servicesSecondaryRangeName: services
+            useIpAliases: true
+          loggingService: logging.googleapis.com/kubernetes
+          masterAuth:
+            username:
+          masterAuthorizedNetworksConfig:
+            enabled: false
+          monitoringService: monitoring.googleapis.com/kubernetes
+          networkPolicy:
+            enabled: true
+          networkSelector:
+            matchControllerRef: true
+          networkConfig:
+            enableIntraNodeVisibility: true
+          subnetworkSelector:
+            matchControllerRef: true
+        writeConnectionSecretToRef:
+          namespace: crossplane-system
+        providerConfigRef:
+          name: gcp-provider        
+    patches:
+    - type: PatchSet
+      patchSetName: metadata
+    - fromFieldPath: spec.id
+      toFieldPath: metadata.name
+    - type: ToCompositeFieldPath
+      fromFieldPath: metadata.name
+      toFieldPath: status.clusterName
+    - fromFieldPath: spec.parameters.version
+      toFieldPath: spec.forProvider.initialClusterVersion
+    - fromFieldPath: spec.id
+      toFieldPath: spec.writeConnectionSecretToRef.name
+      transforms:
+      - type: string
+        string:
+          fmt: "%s-gkecluster"
+    - fromFieldPath: spec.writeConnectionSecretToRef.namespace
+    - type: ToCompositeFieldPath
+      fromFieldPath: status.atProvider.status
+      toFieldPath: status.controlPlaneStatus
+    connectionDetails:
+    - fromConnectionSecretKey: kubeconfig
+    readinessChecks:
+    - type: MatchString
+      fieldPath: "status.atProvider.status"
+      matchString: "RUNNING"
+
+  - name: gkenode
+    base:
+      apiVersion: container.gcp.crossplane.io/v1beta1
+      kind: NodePool
+      spec:
+        forProvider:
+          locations:
+          - us-central1-a  # makes this a single-zone cluster with a single node
+          clusterSelector:
+            matchControllerRef: true
+          config:
+            oauthScopes:
+            - https://www.googleapis.com/auth/cloud-platform
+            - https://www.googleapis.com/auth/devstorage.read_only   #required for communicating with gcr.io (Google Container Registry)
+            - https://www.googleapis.com/auth/logging.write
+            - https://www.googleapis.com/auth/monitoring
+            - https://www.googleapis.com/auth/compute
+            shieldedInstanceConfig:
+              enableIntegrityMonitoring: true
+              enableSecureBoot: true
+          autoscaling:
+            enabled: true
+            maxNodeCount: 5
+          management:
+            autoRepair: true
+            autoUpgrade: false
+        providerConfigRef:
+          name: gcp-provider
+    patches:
+    - type: PatchSet
+      patchSetName: metadata
+    - fromFieldPath: spec.id
+      toFieldPath: metadata.name
+    - fromFieldPath: spec.parameters.nodeCount
+      toFieldPath: spec.forProvider.autoscaling.minNodeCount
+    - fromFieldPath: spec.parameters.nodeCount
+      toFieldPath: spec.forProvider.initialNodeCount
+    - fromFieldPath: spec.parameters.nodeSize
+      toFieldPath: spec.forProvider.config.machineType
+      transforms:
+      - type: map
+        map:    # for more info, see https://gcpinstances.doit-intl.com/
+          small: e2-standard-2    # 2 vCPUs, 8 GiB memory
+          medium: e2-standard-4   # 4 vCPUs, 16 GiB memory
+          large: e2-standard-8    # 8 vCPUs, 32 GiB memory
+          xlarge: e2-standard-16  # 16 vCPUs, 64 GiB memory
+          2xlarge: e2-standard-32  # 32 vCPUs, 128 GiB memory
+    - type: ToCompositeFieldPath
+      fromFieldPath: status.atProvider.status
+      toFieldPath: status.nodePoolStatus
+    readinessChecks:
+    - type: MatchString
+      fieldPath: status.atProvider.status
+      matchString: RUNNING
