@@ -66,7 +66,7 @@ flux bootstrap github \
   --owner=${GITHUB_USERNAME} \
   --repository=management-cluster \
   --branch=main \
-  --path=. \
+  --path=./mgt-cluster \
   --personal
 ```
 ## Create a sops secret for decrypting secret in the cluster
