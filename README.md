@@ -1,4 +1,4 @@
-# edc-demo
+# BCSS Tech Day demo
 This demo shows how to use Crossplane and Flux to automate the provisioning of 
 cloud infrastructure resources at scale, and by using GitOps principles.
 On high level, the solution relies on a management cluster that can be used to bootstrap
@@ -14,8 +14,7 @@ manually. Understanding those steps with the goal of automating as much of them
 as possible will be another benefit of this demo.
 
 Finally, there are several [ways to structure the repositories](https://fluxcd.io/flux/guides/repository-structure/) based on various critria such as access control, organizational structure, etc. This demo adopts a simple and
-easy-to-understand aprpoach of using a Monorepo, where infrasture components and applications
-are all stored in the same repo.
+easy-to-understand aprpoach of using two separate repositories, one for the management cluster and another for the workload cluster.
 
 ## Overview
 The following steps describe how to run this demo. There are also some prerequisites
@@ -65,9 +64,9 @@ GITHUB_PAT=<your GitHub Personal Access Token>
 
 flux bootstrap github \
   --owner=${GITHUB_USERNAME} \
-  --repository=edc-demo \
+  --repository=management-cluster \
   --branch=main \
-  --path=./management-cluster \
+  --path=. \
   --personal
 ```
 ## Create a sops secret for decrypting secret in the cluster
