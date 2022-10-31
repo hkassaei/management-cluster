@@ -91,6 +91,9 @@ spec:
             enableIntraNodeVisibility: true
           subnetworkSelector:
             matchControllerRef: true
+          workloadIdentityConfig:
+            workloadPool: gcprdpscdpochcppaasdev01-c304.svc.id.goog
+            # more info: https://cloud.google.com/kubernetes-engine/docs/how-to/workload-identity#enable_on_cluster
         writeConnectionSecretToRef:
           namespace: crossplane-system
         providerConfigRef:
@@ -144,7 +147,7 @@ spec:
               enableSecureBoot: true
           autoscaling:
             enabled: true
-            maxNodeCount: 5
+            maxNodeCount: 3
           management:
             autoRepair: true
             autoUpgrade: false
