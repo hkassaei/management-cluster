@@ -1,13 +1,13 @@
 apiVersion: platform.com/v1alpha1
 kind: KubernetesClusterClaim
 metadata:
-  name: workload-cluster-08-11-2022-A
+  name: workload-cluster-08-11-2022-1
   namespace: default
   labels:
     provider: gcp-classic
     cluster: gke
 spec:
-  id: workload-cluster-08-11-2022-A   
+  id: workload-cluster-08-11-2022-1 
   compositionSelector:
     matchLabels:
       provider: gcp-classic
