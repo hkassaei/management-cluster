@@ -37,7 +37,7 @@ spec:
       kind: Subnetwork
       spec:
         forProvider:
-          region: us-east4
+          region: us-central1
           networkSelector:
             matchControllerRef: true
           privateIpGoogleAccess: true
@@ -63,7 +63,7 @@ spec:
           clusterType: "workload"
       spec:
         forProvider:
-          location: us-east4
+          location: us-central1
           addonsConfig:
             gcePersistentDiskCsiDriverConfig:
               enabled: true
@@ -126,9 +126,9 @@ spec:
       spec:
         forProvider:
           locations:
-          - us-east4-a
-          - us-east4-b
-          - us-east4-c
+          - us-central1-a
+          - us-central1-b
+          - us-central1-c
           clusterSelector:
             matchControllerRef: true
           config:
