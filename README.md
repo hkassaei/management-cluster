@@ -1,6 +1,7 @@
 # Crossplane + Flux + App using CloudSQL  
-This demo shows how to use Crossplane and Flux to automate the provisioning of 
-cloud infrastructure resources at scale, and by using GitOps principles.
+This repository is part (the management cluster part) of a demo that shows how to use
+Crossplane and Flux to automate the provisioning of cloud infrastructure resources at scale,
+and by using GitOps principles.
 
 On high level, the solution relies on a management cluster that can be used to bootstrap
 and monitor the status of other 'workload clusters', where the applications/workloads
