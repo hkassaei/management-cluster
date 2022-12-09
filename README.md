@@ -20,6 +20,10 @@ manually. Understanding those steps with the goal of automating as much of them
 as possible will be another benefit of this demo.
 
 ## Overview
+This diagram shows, on high-level, what the goal is:
+
+![Screenshot](/images/crossplane-flux-demo-outline.png)
+
 The following steps describe how to run this demo. There are also some prerequisites
 to be able run the demo.
 
