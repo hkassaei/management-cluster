@@ -41,12 +41,10 @@ to be able run the demo.
 ### Steps
   0. Install all the prerequisites tools on your machine.
   1. Follow [these instructions](https://fluxcd.io/flux/guides/mozilla-sops/) to encrypt your GCP credentials before storing them in the git repo.
-  2. Bootstrap Flux in the management cluster.
+  2. Bootstrap Flux in the management cluster created in step 0.
   3. Create a secret to provide Flux with the key for decrypting GCP credentials in the cluster.
-  4. Instruct Flux to deploy Crossplane, Crossplane GCP provider, and all the
-     needed configurations and XRDs in the management cluster.
-  5. Submit a claim for a gke cluster to the management cluster.
-  6. Wait for the workload (GKE) cluster to be in ready state.
+  4. Submit a claim for a gke cluster to the management cluster.
+  5. Wait for the workload (GKE) cluster to be in ready state.
         * Run `gcloud container clusters get-credentials CLUSTER_NAME --region=REGION_NAME`
           to fetch the kubeconfig for the GKE cluster.
 
