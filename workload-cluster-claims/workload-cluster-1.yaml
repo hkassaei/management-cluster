@@ -15,7 +15,7 @@ spec:
       type: single-zone
   parameters:
     version: "latest"
-    nodeSize: medium
+    nodeSize: small
     nodeCount: 1
   writeConnectionSecretToRef:
     name: k8s-connection
