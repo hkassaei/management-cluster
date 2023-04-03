@@ -49,7 +49,7 @@ to be able run the demo.
           to fetch the kubeconfig for the GKE cluster.
 
 ## Bootstrap Flux in the management cluster
-Once you have brough up the management cluster, whether on your local machine or 
+Once you have brought up the management cluster, whether on your local machine or 
 in a cloud environment, bootstrap flux on it:
 
 ```
@@ -57,10 +57,10 @@ GITHUB_USERNAME=<your github username>
 GITHUB_PAT=<your GitHub Personal Access Token>
 
 flux bootstrap github \
-  --owner=${GITHUB_USERNAME} \
-  --repository=edc-demo \
+  --owner=hkassaei \
+  --repository=management-cluster \
   --branch=main \
-  --path=./management-cluster \
+  --path=./mgt-cluster \
   --personal
 ```
 ## Create a sops secret for decrypting secret in the cluster
